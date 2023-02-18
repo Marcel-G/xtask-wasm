@@ -327,7 +327,7 @@ impl Dist {
         log::trace!("Generating Wasm output");
         let mut output = Bindgen::new()
             .typescript(self.typescript)
-            .omit_default_module_path(false) // This seems to be incorrectly enabled by default? https://github.com/rustwasm/wasm-bindgen/pull/2519
+            .omit_default_module_path(false) // @todo -- This seems to be incorrectly enabled by default? https://github.com/rustwasm/wasm-bindgen/pull/2519
             .input_path(input_path)
             .out_name(&app_name)
             .target(self.target)
@@ -339,7 +339,7 @@ impl Dist {
 
         let wasm_js = output.js().to_owned();
         let wasm_bin = output.wasm_mut().emit_wasm();
-        let wasm_ts = output.ts().unwrap().to_owned();
+        let maybe_wasm_ts = output.ts();
 
         let wasm_js_path = dist_dir_path.join(&app_name).with_extension("js");
         let wasm_filename = format!("{app_name}_bg"); // keep the `_bg` convention
@@ -359,7 +359,7 @@ impl Dist {
         fs::write(&wasm_bin_path, wasm_bin).context("cannot write Wasm file")?;
 
         let wasm_ts_path =
-        if self.typescript {
+        if let Some(wasm_ts) = maybe_wasm_ts {
             fs::write(&wasm_ts_path, wasm_ts).context("cannot write .d.ts file")?;
             Some(wasm_ts_path)
         } else {
