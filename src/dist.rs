@@ -327,6 +327,7 @@ impl Dist {
         log::trace!("Generating Wasm output");
         let mut output = Bindgen::new()
             .typescript(self.typescript)
+            .omit_default_module_path(false) // This seems to be incorrectly enabled by default? https://github.com/rustwasm/wasm-bindgen/pull/2519
             .input_path(input_path)
             .out_name(&app_name)
             .target(self.target)
