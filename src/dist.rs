@@ -342,7 +342,8 @@ impl Dist {
         let wasm_ts = output.ts().unwrap().to_owned();
 
         let wasm_js_path = dist_dir_path.join(&app_name).with_extension("js");
-        let wasm_bin_path = dist_dir_path.join(&app_name).with_extension("wasm");
+        let wasm_filename = format!("{app_name}_bg"); // keep the `_bg` convention
+        let wasm_bin_path = dist_dir_path.join(wasm_filename).with_extension("wasm");
         let wasm_ts_path = dist_dir_path.join(&app_name).with_extension("d.ts");
 
         if dist_dir_path.exists() {
