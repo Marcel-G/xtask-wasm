@@ -1,4 +1,4 @@
-use crate::anyhow::{anyhow, ensure, Context, Result};
+use crate::anyhow::{bail, anyhow, ensure, Context, Result};
 use lazy_static::lazy_static;
 use std::{
     fs,
@@ -131,10 +131,37 @@ impl WasmOpt {
         }
 
         log::info!("Optimizing Wasm");
-        ensure!(
-            command.output()?.status.success(),
-            "command `wasm-opt` failed"
-        );
+        // Capture the output
+        let output = command
+            .output()
+            .with_context(|| "Failed to execute `wasm-opt` command")?;
+
+        // Check if the command succeeded
+        if !output.status.success() {
+            let exit_code = output.status.code();
+            let exit_message = match exit_code {
+                Some(code) => format!("Exit code: {}", code),
+                None => "Process terminated by signal or failed unexpectedly".to_string(),
+            };
+
+            // Convert stderr and stdout to readable strings
+            let stderr = String::from_utf8_lossy(&output.stderr);
+            let stdout = String::from_utf8_lossy(&output.stdout);
+
+            // Log detailed error information
+            log::error!(
+                "wasm-opt command failed {} \n{}\n{}",
+                exit_message,
+                stdout,
+                stderr
+            );
+
+            // Return an error with more context
+            bail!(
+                "wasm-opt command failed {}",
+                exit_message,
+            );
+        }
 
         fs::remove_file(input_path)?;
         fs::rename(&output_path, input_path)?;

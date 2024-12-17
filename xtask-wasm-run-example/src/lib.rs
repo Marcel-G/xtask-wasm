@@ -106,8 +106,8 @@ impl RunExample {
             quote! {
                 std::fs::write(
                     dist_dir.join("index.html"),
-                    r#"<!DOCTYPE html><html><head><meta charset="utf-8"/><script type="module">import init from "/app.js";init(new URL('app.wasm', import.meta.url));</script></head><body></body></html>"#,
-                );
+                    r#"<!DOCTYPE html><html><head><meta charset="utf-8"/><script type="module">import init from "/app.js";init(new URL('app_bg.wasm', import.meta.url));</script></head><body></body></html>"#,
+                )?;
             }
         };
 
@@ -166,7 +166,7 @@ impl RunExample {
 
                 match cli.command {
                     Some(Command::Dist(mut dist)) => {
-                        let xtask_wasm::DistResult { dist_dir, .. } = dist
+                        let dist_dir = dist
                             .example(module_path!())
                             #app_name
                             #static_dir
